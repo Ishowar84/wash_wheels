@@ -1,13 +1,13 @@
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:wash_wheels/auth/cubit/role_cubit.dart';
+import 'package:wash_wheels/core/models/user.dart'; // <-- IMPORTANT: Import user model for UserRole
 import 'package:wash_wheels/features/customer/customer_home_scaffold.dart';
 import 'package:wash_wheels/features/provider/provider_home_scaffold.dart';
 
 import 'auth/cubit/auth_cubit.dart';
+import 'auth/cubit/role_cubit.dart';
 import 'auth/view/login_page.dart';
 import 'firebase_options.dart';
 
@@ -45,50 +45,39 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// THIS WIDGET IS THE KEY - WE ARE FIXING IT HERE
+// THIS IS THE CORRECTED ROUTING LOGIC
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // We listen to the AuthCubit's state changes here
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
-        // CHANGED: We now handle each state explicitly
-
+        // If the user is successfully authenticated...
         if (state is AuthAuthenticated) {
-          // If the user is logged in, show the role-based home page
-          return const RoleBasedHomePage();
+          // ...we check the role from the user object inside the state
+          if (state.user.role == UserRole.provider) {
+            return const ProviderHomeScaffold();
+          } else {
+            return const CustomerHomeScaffold();
+          }
         }
 
-        if (state is AuthUnauthenticated || state is AuthError) {
-          // If the user is logged out or an error occurred, show the login page
+        // If the user is unauthenticated...
+        if (state is AuthUnauthenticated) {
           return const LoginPage();
         }
 
-        // NEW: While the state is AuthInitial, show a loading screen.
-        // This is the most important change and fixes the white screen.
+        // For any other state (AuthInitial, AuthLoading, AuthError),
+        // we show a loading screen. This prevents flashes of the wrong screen.
+        // The LoginPage will show the specific error message if the state is AuthError.
         return const Scaffold(
+          backgroundColor: Color(0xFF2C2B4B),
           body: Center(
             child: CircularProgressIndicator(),
           ),
         );
-      },
-    );
-  }
-}
-
-
-class RoleBasedHomePage extends StatelessWidget {
-  const RoleBasedHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<RoleCubit, UserRole>(
-      builder: (context, role) {
-        if (role == UserRole.provider) {
-          return const ProviderHomeScaffold();
-        }
-        return const CustomerHomeScaffold();
       },
     );
   }
