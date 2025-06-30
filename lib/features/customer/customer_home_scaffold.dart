@@ -1,0 +1,66 @@
+import 'package:flutter/material.dart';
+import 'package:wash_wheels/features/customer/book_service_page.dart';
+import 'package:wash_wheels/features/customer/marketplace_page.dart';
+import 'package:wash_wheels/features/common/profile_page.dart';
+
+import 'booking_lists_page.dart';
+
+class CustomerHomeScaffold extends StatefulWidget {
+  const CustomerHomeScaffold({super.key});
+
+  @override
+  State<CustomerHomeScaffold> createState() => _CustomerHomeScaffoldState();
+}
+
+class _CustomerHomeScaffoldState extends State<CustomerHomeScaffold> {
+  int _selectedIndex = 0;
+
+  static  List<Widget> _pages = <Widget>[
+    BookServicePage(),
+    BookingsListPage(),
+    MarketplacePage(),
+    ProfilePage(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: const Color(0xFF3E3C63),
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white54,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.car_rental_outlined),
+            label: 'Book',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list_alt_outlined),
+            label: 'My Bookings',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_bag_outlined),
+            label: 'Shop',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
+          ),
+        ],
+      ),
+    );
+  }
+}
