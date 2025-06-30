@@ -1,71 +1,82 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wash_wheels/auth/cubit/auth_cubit.dart';
-
-
-import '../../auth/cubit/role_cubit.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Get user info from Firebase Auth
-    final user = FirebaseAuth.instance.currentUser;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Profile'),
-        backgroundColor: const Color(0xFF3E3C63),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => context.read<AuthCubit>().signOut(),
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundColor: const Color(0xFF8A2BE2),
-            child: const Icon(Icons.person, size: 50, color: Colors.white),
-          ),
-          const SizedBox(height: 16),
-          Center(child: Text(user?.email ?? 'No email found', style: const TextStyle(fontSize: 20))),
-          const SizedBox(height: 32),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.directions_car_outlined),
-            title: const Text('Manage My Vehicles'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () { /* TODO: Navigate to vehicle management page */ },
-          ),
-          ListTile(
-            leading: const Icon(Icons.payment_outlined),
-            title: const Text('Payment Options'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () { /* TODO: Navigate to payment options page */ },
-          ),
-          ListTile(
-            leading: const Icon(Icons.loyalty_outlined),
-            title: const Text('Loyalty & Subscription'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () { /* TODO: Navigate to subscription page */ },
-          ),
-          const Divider(),
-          // This is a temporary button for development to test the other UI
-          SwitchListTile(
-            title: const Text('View as Service Provider'),
-            secondary: const Icon(Icons.switch_account_outlined),
-            value: context.watch<RoleCubit>().state == UserRole.provider,
-            onChanged: (isProvider) {
-              context.read<RoleCubit>().setRole(isProvider ? UserRole.provider : UserRole.customer);
-            },
-          )
-        ],
+      // The AppBar is now in the home scaffolds, so we don't need one here.
+      // We wrap the body in a BlocBuilder to get the latest auth state.
+      body: BlocBuilder<AuthCubit, AuthState>(
+        builder: (context, state) {
+          // --- THIS IS THE KEY ---
+          // We only build the profile UI if the user is authenticated.
+          if (state is AuthAuthenticated) {
+            return ListView(
+              padding: const EdgeInsets.all(16.0),
+              children: [
+                // User's Email Tile
+                Card(
+                  color: theme.colorScheme.secondary,
+                  child: ListTile(
+                    leading: Icon(Icons.email_outlined, color: theme.colorScheme.primary),
+                    title: const Text('Email'),
+                    subtitle: Text(
+                      state.user.email ?? 'No email provided', // Safely access the user's email
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ),
+
+                // User's Role Tile
+                Card(
+                  color: theme.colorScheme.secondary,
+                  child: ListTile(
+                    leading: Icon(Icons.verified_user_outlined, color: theme.colorScheme.primary),
+                    title: const Text('Account Type'),
+                    subtitle: Text(
+                      // Capitalize the first letter of the role for display
+                      state.user.role.name[0].toUpperCase() + state.user.role.name.substring(1),
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // --- SIGN OUT BUTTON ---
+                // We don't need a sign-out button here anymore because it's
+                // in the AppBar of the home scaffolds. This simplifies the page.
+                // If you *want* a button here, you can uncomment this:
+                /*
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  onPressed: () {
+                    // This calls the same signOut method
+                    context.read<AuthCubit>().signOut();
+                  },
+                  child: const Text('Sign Out'),
+                ),
+                */
+              ],
+            );
+          }
+
+          // If the state is not authenticated for some reason,
+          // show a fallback to prevent crashing.
+          return const Center(
+            child: Text('Not logged in.'),
+          );
+        },
       ),
     );
   }

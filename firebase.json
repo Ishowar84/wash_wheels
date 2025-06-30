@@ -1,1 +1,39 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"wash-wheels-66ac1","appId":"1:340194168269:android:f1cfc740f27289fc6e8884","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"wash-wheels-66ac1","configurations":{"android":"1:340194168269:android:f1cfc740f27289fc6e8884","ios":"1:340194168269:ios:4313ec05d0927b056e8884","web":"1:340194168269:web:83964cb880cd064e6e8884"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "wash-wheels-66ac1",
+          "appId": "1:340194168269:android:f1cfc740f27289fc6e8884",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "wash-wheels-66ac1",
+          "configurations": {
+            "android": "1:340194168269:android:f1cfc740f27289fc6e8884",
+            "ios": "1:340194168269:ios:4313ec05d0927b056e8884",
+            "web": "1:340194168269:web:83964cb880cd064e6e8884"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    }
+  ]
+}
